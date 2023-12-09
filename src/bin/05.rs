@@ -358,8 +358,7 @@ humidity-to-location map:
 
         let dest_ranges = map_range(
             &range,
-            &vec![
-                Mapping {
+            &[Mapping {
                     source: 3,
                     destination: 103,
                     length: 5,
@@ -368,8 +367,7 @@ humidity-to-location map:
                     source: 9,
                     destination: 201,
                     length: 10,
-                },
-            ],
+                }],
         );
         assert_eq!(
             dest_ranges,

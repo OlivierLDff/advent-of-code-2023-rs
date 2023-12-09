@@ -14,7 +14,7 @@ enum HandType {
 }
 
 impl HandType {
-    fn to_int(&self) -> u32 {
+    fn to_int(self) -> u32 {
         match self {
             HandType::FiveOfAKind => 7,
             HandType::FourOfAKind => 6,
@@ -27,9 +27,15 @@ impl HandType {
     }
 }
 
+impl Ord for HandType {
+    fn cmp(&self, other: &Self) -> std::cmp::Ordering {
+        self.to_int().cmp(&other.to_int())
+    }
+}
+
 impl PartialOrd for HandType {
     fn partial_cmp(&self, other: &Self) -> Option<std::cmp::Ordering> {
-        self.to_int().partial_cmp(&other.to_int())
+        Some(self.cmp(other))
     }
 }
 
@@ -45,22 +51,28 @@ enum Card {
 }
 
 impl Card {
-    fn to_int(&self) -> u32 {
+    fn to_int(self) -> u32 {
         match self {
             Card::A => 14,
             Card::K => 13,
             Card::Q => 12,
             Card::J => 11,
             Card::T => 10,
-            Card::Number(n) => *n as u32,
+            Card::Number(n) => n as u32,
             Card::WeakJoker => 0,
         }
     }
 }
 
+impl Ord for Card {
+    fn cmp(&self, other: &Self) -> std::cmp::Ordering {
+        self.to_int().cmp(&other.to_int())
+    }
+}
+
 impl PartialOrd for Card {
     fn partial_cmp(&self, other: &Self) -> Option<std::cmp::Ordering> {
-        self.to_int().partial_cmp(&other.to_int())
+        Some(self.cmp(other))
     }
 }
 
@@ -71,29 +83,29 @@ struct Hand {
     bid: u32,
 }
 
-fn compare_cards_values(cards: &[Card; 5], other_cards: &[Card; 5]) -> Option<std::cmp::Ordering> {
+fn compare_cards_values(cards: &[Card; 5], other_cards: &[Card; 5]) -> std::cmp::Ordering {
     for (v, other_v) in cards.iter().zip(other_cards.iter()) {
         if v == other_v {
             continue;
         }
-        return v.partial_cmp(other_v);
+        return v.cmp(other_v);
     }
-    Some(std::cmp::Ordering::Equal)
-}
-
-impl PartialOrd for Hand {
-    fn partial_cmp(&self, other: &Self) -> Option<std::cmp::Ordering> {
-        if self.hand_type == other.hand_type {
-            compare_cards_values(&self.cards, &other.cards)
-        } else {
-            self.hand_type.partial_cmp(&other.hand_type)
-        }
-    }
+    std::cmp::Ordering::Equal
 }
 
 impl Ord for Hand {
     fn cmp(&self, other: &Self) -> std::cmp::Ordering {
-        self.partial_cmp(other).expect("Should be comparable")
+        if self.hand_type == other.hand_type {
+            compare_cards_values(&self.cards, &other.cards)
+        } else {
+            self.hand_type.cmp(&other.hand_type)
+        }
+    }
+}
+
+impl PartialOrd for Hand {
+    fn partial_cmp(&self, other: &Self) -> Option<std::cmp::Ordering> {
+        Some(self.cmp(other))
     }
 }
 
@@ -170,11 +182,11 @@ fn get_hand_type(cards: &[Card; 5]) -> HandType {
         _ => {}
     }
     match joker_count {
-        4 => return HandType::FiveOfAKind,
-        3 => return HandType::FourOfAKind,
-        2 => return HandType::ThreeOfAKind,
-        1 => return HandType::OnePair,
-        _ => return HandType::HighCard,
+        4 => HandType::FiveOfAKind,
+        3 => HandType::FourOfAKind,
+        2 => HandType::ThreeOfAKind,
+        1 => HandType::OnePair,
+        _ => HandType::HighCard,
     }
 }
 
@@ -216,7 +228,7 @@ fn solve(input: &str, use_weak_joker: bool) -> Option<u32> {
         hands
             .iter()
             .enumerate()
-            .map(|(i, h)| (i + 1) as u32 * h.bid as u32)
+            .map(|(i, h)| (i + 1) as u32 * h.bid)
             .sum(),
     )
 }
