@@ -105,7 +105,7 @@ pub fn part_two(input: &str) -> Option<u32> {
         }
     }
 
-    Some(card_amount.iter().map(|(_, amount)| *amount).sum())
+    Some(card_amount.values().sum())
 }
 
 #[cfg(test)]

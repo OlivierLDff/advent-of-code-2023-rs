@@ -87,7 +87,7 @@ fn parse_almanac_multi_mapping(parts: &[&str]) -> Result<Vec<Vec<Mapping>>> {
     ]
     .iter()
     .zip(parts.iter())
-    .map(|(expected_name, part)| parse_mappings(*part, *expected_name))
+    .map(|(expected_name, part)| parse_mappings(part, expected_name))
     .collect()
 }
 
@@ -160,7 +160,7 @@ fn split_range_for_mapping(
     range: &Range,
     mapping: &Mapping,
 ) -> (Option<Range>, Option<Range>, Option<Range>) {
-    let (before_range, remaining_range) = split_range(&range, mapping.source);
+    let (before_range, remaining_range) = split_range(range, mapping.source);
 
     if let Some(range) = remaining_range {
         let (contained_range, remaining_range) =
@@ -212,8 +212,7 @@ fn map_range_recursive(range: &Range, mappings: &[Vec<Mapping>]) -> Vec<Range> {
     } else {
         map_range(range, &mappings[0])
             .iter()
-            .map(|range| map_range_recursive(range, &mappings[1..]))
-            .flatten()
+            .flat_map(|range| map_range_recursive(range, &mappings[1..]))
             .collect()
     }
 }
@@ -227,7 +226,7 @@ pub fn part_two(input: &str) -> Option<u32> {
         .chunks(2)
         .map(|w| (w[0], w[1]))
         .map(|(start, length)| {
-            if length <= 0 {
+            if length == 0 {
                 Err(anyhow::anyhow!("Invalid length {}", length))
             } else {
                 Ok(Range { start, length })
@@ -238,8 +237,7 @@ pub fn part_two(input: &str) -> Option<u32> {
 
     seeds
         .iter()
-        .map(|range| map_range_recursive(range, &almanac.mappings))
-        .flatten()
+        .flat_map(|range| map_range_recursive(range, &almanac.mappings))
         .map(|range| range.start as u32)
         .min()
 }

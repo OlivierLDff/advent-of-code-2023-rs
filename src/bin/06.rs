@@ -43,26 +43,22 @@ fn parse_input2(input: &str) -> Race {
         .collect::<String>()
         .parse()
         .expect("Time should be a number");
-    let distance = lines
+    let record = lines
         .next()
         .expect("There should be a time line")
         .split_whitespace()
         .skip(1)
         .collect::<String>()
         .parse()
-        .expect("Time should be a number");
-    Race {
-        time: time,
-        record: distance,
-    }
+        .expect("Distance should be a number");
+    Race { time, record }
 }
 
 fn compute_all_distances(time: u64) -> Vec<u64> {
     (0..=time)
         .map(|press_time| {
-            let speed = press_time * 1;
             let remaining_time = time - press_time;
-            remaining_time * speed
+            remaining_time * press_time
         })
         .collect()
 }
